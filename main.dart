@@ -1,6 +1,11 @@
 import 'dart:io';
+import 'dart:math';
+
+import 'package:http/http.dart';
+import 'package:web3dart/web3dart.dart';
 
 import 'blockchain/constants.dart';
+import 'blockchain/services/transaction_service.dart';
 import 'blockchain/services/wallet_service.dart';
 import 'general/services/graphics_service.dart';
 import 'general/services/time_service.dart';
@@ -20,15 +25,20 @@ class OffTheGridBot {
   late OTGWallet _wallet;
   late int _chainID;
 
+  // Shared objects
+  Web3Client _client = Web3Client(chainstackRPCUrl, Client());
+
   // Services
   final WalletService _walletService = WalletService();
+  late final TransactionService _transactionService =
+      TransactionService(_client);
   final TimeService _timeService = TimeService();
   late final GraphicsService _graphicsService = GraphicsService(_timeService);
 
   void init() async {
     await onboarding();
     await chainSelection();
-    // mainLoop();
+    await mainLoop();
   }
 
   Future<void> onboarding() async {
@@ -53,9 +63,7 @@ class OffTheGridBot {
 
     _wallet = _walletService.createExistingWallet(privateKey);
 
-    _graphicsService.clearScreen();
-
-    print('Successfully connected!');
+    print('\nSuccessfully connected!');
     print('Your public address: ${_wallet.publicKey}\n');
 
     await _timeService.delay(1000);
@@ -94,13 +102,41 @@ class OffTheGridBot {
       }
     }
     await _timeService.delay(2000);
-
-    _graphicsService.clearScreen();
   }
 
-  void mainLoop() {
-    while (true) {
-      print('');
+  Future<void> makeTransaction() async {}
+
+  Future<void> mainLoop() async {
+    bool running = true;
+    print('');
+    while (running) {
+      print('\n(b) - check balance');
+      print('(s) - send native cryptocurrency');
+      print('(c) - change network');
+      print('(x) - exit');
+      final String response = stdin.readLineSync()!;
+      switch (response) {
+        case 'b':
+          print('\nGetting balance ...');
+          final EtherAmount balance =
+              await _client.getBalance(_wallet.publicKeyEth);
+          final String currency = mainNetworks[_chainID] == null
+              ? testNetworks[_chainID]!.currency
+              : mainNetworks[_chainID]!.currency;
+          print(
+              '\nBalance: ${(balance.getInWei.toDouble() / pow(10, 18)).toStringAsFixed(3)} $currency');
+          break;
+        case 's':
+          print('\nTODO - transaction');
+          break;
+        case 'c':
+          await chainSelection();
+          break;
+        case 'x':
+          print('\nOkay then, bye!');
+          running = false;
+          break;
+      }
     }
   }
 }

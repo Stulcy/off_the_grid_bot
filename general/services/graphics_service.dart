@@ -5,10 +5,6 @@ class GraphicsService {
 
   final TimeService _timeService;
 
-  void clearScreen() {
-    print("\x1B[2J\x1B[0;0H");
-  }
-
   Future<void> greet() async {
     print("   ____               _   _                   ");
     await _timeService.delay(300);

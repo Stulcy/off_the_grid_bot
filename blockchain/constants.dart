@@ -1,5 +1,8 @@
 import 'models/network.dart';
 
+const String chainstackRPCUrl =
+    'https://nd-920-675-139.p2pify.com/70922573d5377470380da4203b92dfc2';
+
 const Map<int, Network> mainNetworks = {
   1: Network("Ethereum Mainnet", 'ETH'),
   56: Network("Binance Smart Chain Mainnet", 'BNB'),
